@@ -43,7 +43,7 @@ print("  DEMO: IA Explicable (XAI) con SHAP")
 print("  Predicción de riesgo cardiovascular")
 print("=" * 55)
 print()
-print("▶ Paso 1: Generando datos de pacientes...")
+print(" Paso 1: Generando datos de pacientes...")
 
 np.random.seed(42)
 N = 500
@@ -83,15 +83,15 @@ df = pd.DataFrame({
     "riesgo_alto": riesgo_alto
 })
 
-print(f"   ✓ {N} pacientes generados")
-print(f"   ✓ Riesgo alto: {riesgo_alto.sum()} pacientes ({riesgo_alto.mean()*100:.0f}%)")
-print(f"   ✓ Riesgo bajo: {(1-riesgo_alto).sum()} pacientes ({(1-riesgo_alto).mean()*100:.0f}%)")
+print(f"    {N} pacientes generados")
+print(f"    Riesgo alto: {riesgo_alto.sum()} pacientes ({riesgo_alto.mean()*100:.0f}%)")
+print(f"    Riesgo bajo: {(1-riesgo_alto).sum()} pacientes ({(1-riesgo_alto).mean()*100:.0f}%)")
 print()
 
 # ─────────────────────────────────────────────
 # PASO 2: Entrenar el modelo
 # ─────────────────────────────────────────────
-print("▶ Paso 2: Entrenando el modelo RandomForest...")
+print(" Paso 2: Entrenando el modelo RandomForest...")
 
 FEATURES = ["edad", "presion", "colesterol", "imc",
             "fuma", "ejercicio", "diabetes", "historial"]
@@ -112,14 +112,14 @@ modelo = RandomForestClassifier(
 modelo.fit(X_train, y_train)
 
 precision = accuracy_score(y_test, modelo.predict(X_test))
-print(f"   ✓ Modelo entrenado con {len(X_train)} pacientes")
-print(f"   ✓ Precisión en datos de prueba: {precision*100:.1f}%")
+print(f"    Modelo entrenado con {len(X_train)} pacientes")
+print(f"    Precisión en datos de prueba: {precision*100:.1f}%")
 print()
 
 # ─────────────────────────────────────────────
 # PASO 3: Predecir sin XAI  →  "caja negra"
 # ─────────────────────────────────────────────
-print("▶ Paso 3: Predicción SIN explicación (caja negra)...")
+print(" Paso 3: Predicción SIN explicación (caja negra)...")
 
 # Inventamos 3 pacientes nuevos para demostrar
 pacientes_nuevos = pd.DataFrame({
@@ -142,18 +142,18 @@ print()
 print("   Paciente                      │ Riesgo  │ Probabilidad")
 print("   ─────────────────────────────────────────────────────")
 for nombre, pred, prob in zip(nombres, predicciones, probabilidades):
-    etiqueta = "🔴 ALTO" if pred == 1 else "🟢 BAJO"
+    etiqueta = "ALTO" if pred == 1 else " BAJO"
     print(f"   {nombre:<30} │ {etiqueta}  │ {prob*100:.1f}%")
 
 print()
-print("   ⚠️  El modelo decide pero NO explica por qué.")
+print("     El modelo decide pero NO explica por qué.")
 print("      Aquí es donde entra XAI.")
 print()
 
 # ─────────────────────────────────────────────
 # PASO 4: Aplicar SHAP  →  "caja transparente"
 # ─────────────────────────────────────────────
-print("▶ Paso 4: Calculando valores SHAP (esto puede tardar unos segundos)...")
+print("Paso 4: Calculando valores SHAP (esto puede tardar unos segundos)...")
 
 # TreeExplainer es la versión optimizada para
 # modelos basados en árboles (RandomForest, XGBoost, etc.)
@@ -169,13 +169,13 @@ elif shap_values.ndim == 3:
 else:
     sv = shap_values
 
-print(f"   ✓ SHAP calculado para {len(pacientes_nuevos)} pacientes")
+print(f"    SHAP calculado para {len(pacientes_nuevos)} pacientes")
 print()
 
 # ─────────────────────────────────────────────
 # PASO 5: Imprimir explicación por paciente
 # ─────────────────────────────────────────────
-print("▶ Paso 5: Explicación detallada por paciente")
+print(" Paso 5: Explicación detallada por paciente")
 print()
 
 NOMBRES_VARIABLES = {
@@ -196,7 +196,7 @@ for i, nombre in enumerate(nombres):
     valor_base = float(ev[1]) if hasattr(ev, '__len__') else float(ev)
 
     print(f"   ┌─ {nombre}")
-    print(f"   │  Decisión: {'🔴 RIESGO ALTO' if pred==1 else '🟢 RIESGO BAJO'}  ({prob*100:.1f}%)")
+    print(f"   │  Decisión: {' RIESGO ALTO' if pred==1 else ' RIESGO BAJO'}  ({prob*100:.1f}%)")
     print(f"   │  Base del modelo: {valor_base*100:.1f}% (promedio de todos los pacientes)")
     print(f"   │")
     print(f"   │  Factores que AUMENTARON el riesgo (+):")
@@ -208,7 +208,7 @@ for i, nombre in enumerate(nombres):
     for feat, val in pares:
         valor_paciente = pacientes_nuevos.iloc[i][feat]
         if val > 0.005:
-            barra = "█" * min(int(abs(val) * 100), 20)
+            barra = " " * min(int(abs(val) * 100), 20)
             if feat in ["fuma", "ejercicio", "diabetes", "historial"]:
                 valor_str = "Sí" if valor_paciente == 1 else "No"
             else:
@@ -220,12 +220,12 @@ for i, nombre in enumerate(nombres):
     for feat, val in reversed(pares):
         valor_paciente = pacientes_nuevos.iloc[i][feat]
         if val < -0.005:
-            barra = "█" * min(int(abs(val) * 100), 20)
+            barra = " " * min(int(abs(val) * 100), 20)
             if feat in ["fuma", "ejercicio", "diabetes", "historial"]:
                 valor_str = "Sí" if valor_paciente == 1 else "No"
             else:
                 valor_str = str(valor_paciente)
-            print(f"   │    ↓ {NOMBRES_VARIABLES[feat]:<22} = {valor_str:<6}  {val*100:.1f}%  {barra}")
+            print(f"   │     {NOMBRES_VARIABLES[feat]:<22} = {valor_str:<6}  {val*100:.1f}%  {barra}")
 
     print(f"   └─────────────────────────────────────────────────")
     print()
@@ -233,7 +233,7 @@ for i, nombre in enumerate(nombres):
 # ─────────────────────────────────────────────
 # PASO 6: Gráficas
 # ─────────────────────────────────────────────
-print("▶ Paso 6: Generando gráficas explicativas...")
+print(" Paso 6: Generando gráficas explicativas...")
 print("   (Se abrirán 3 ventanas - ciérralas para continuar)")
 print()
 
@@ -351,7 +351,7 @@ for idx, (ax_i, nombre_i) in enumerate(zip(axes, nombres)):
     ax_i.barh(labs_i, vals_i, color=cols_i,
               edgecolor="white", linewidth=0.5, height=0.6)
     ax_i.axvline(0, color="#888", linewidth=0.8)
-    ax_i.set_title(f"{nombre_i}\n{'🔴RIESGO ALTO' if predicciones[idx]==1 else '🟢 RIESGO BAJO'} "
+    ax_i.set_title(f"{nombre_i}\n{'RIESGO ALTO' if predicciones[idx]==1 else ' RIESGO BAJO'} "
                    f"({probabilidades[idx]*100:.0f}%)",
                    fontsize=9, pad=8)
     ax_i.spines[["top", "right"]].set_visible(False)
@@ -385,6 +385,4 @@ print("     - grafica_1_importancia_global.png")
 print("     - grafica_2_waterfall_carlos.png")
 print("     - grafica_3_comparacion.png")
 print()
-print("=" * 55)
-print("  Demo completado. ¡Buena suerte en la expo!")
 print("=" * 55)
